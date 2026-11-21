@@ -1,5 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
 import firebaseConfig from './firebase-config.js';
 
 const iconMarkup = { lock: '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>' };
@@ -9,24 +10,35 @@ const emailStep = document.querySelector('#emailStep');
 const otpStep = document.querySelector('#otpStep');
 const emailInput = document.querySelector('#email');
 const phoneInput = document.querySelector('#phone');
+const profilePhone = document.querySelector('#profilePhone');
+const phoneConsent = document.querySelector('#phoneConsent');
 const phonePreview = document.querySelector('#phonePreview');
 const otpInputs = [...document.querySelectorAll('.otp-input')];
 const phonePanel = document.querySelector('#phonePanel');
 const emailPanel = document.querySelector('#emailPanel');
 let confirmationResult = null;
 let auth = null;
+let db = null;
 
 const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('PASTE_');
 if (configured) {
   try {
-    auth = getAuth(initializeApp(firebaseConfig));
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
     onAuthStateChanged(auth, (user) => { if (user) finish(user); });
     if (isSignInWithEmailLink(auth, window.location.href)) completeEmailLink();
   } catch (error) { console.warn('Firebase initialization failed; demo mode enabled.', error); }
 }
 
-function finish(user) {
+async function finish(user) {
+  const savedPhone = (profilePhone?.value || phoneInput?.value || '').trim();
+  if (db && phoneConsent?.checked && savedPhone) {
+    try { await setDoc(doc(db, 'users', user.uid), { email: user.email || null, phoneE164: savedPhone, phoneVerified: false, phoneRecoveryConsent: true, updatedAt: serverTimestamp() }, { merge: true }); }
+    catch (error) { console.warn('Profile metadata was not saved.', error); }
+  }
   localStorage.setItem('traceUserEmail', user.email || user.phoneNumber || 'Verified user');
+  if (savedPhone && phoneConsent?.checked) localStorage.setItem('traceUnverifiedPhone', savedPhone);
   window.location.href = 'dashboard.html';
 }
 
@@ -79,6 +91,7 @@ document.querySelector('#verifyOtp').addEventListener('click', () => {
   if (confirmationResult) { confirmationResult.confirm(code).catch((error) => showError(error.message || 'The SMS code is invalid.')); return; }
   if (code !== '123456') { otpInputs.forEach((input) => { input.style.borderColor = '#ff806e'; }); return; }
   localStorage.setItem('traceUserEmail', phoneInput.value || emailInput.value);
+  if (profilePhone.value && phoneConsent.checked) localStorage.setItem('traceUnverifiedPhone', profilePhone.value.trim());
   window.location.href = 'dashboard.html';
 });
 
