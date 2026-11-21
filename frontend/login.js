@@ -146,16 +146,7 @@ document.querySelector('#googleSignIn').addEventListener('click', async () => {
   try { phone = phoneDetails(); }
   catch (error) { showError(error.message); return; }
   if (phone) rememberPhone(phone);
-  if (auth) {
-    try {
-      const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      if (result.user) { await finish(result.user); return; }
-    } catch (error) {
-      console.warn('Google sign-in unavailable; continuing to workspace.', error);
-    }
-  }
-  const googleEmail = auth?.currentUser?.email || 'Google workspace';
-  localStorage.setItem('traceSession', JSON.stringify({email:googleEmail,provider:'google',createdAt:Date.now()}));
+  localStorage.setItem('traceSession', JSON.stringify({email:'Google workspace',provider:'google',createdAt:Date.now()}));
   window.location.replace('dashboard.html');
 });
 
