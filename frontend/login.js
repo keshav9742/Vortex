@@ -5,6 +5,8 @@ const emailStep = document.querySelector('#emailStep');
 const emailInput = document.querySelector('#email');
 const phoneInput = document.querySelector('#phone');
 const countryCode = document.querySelector('#countryCode');
+const emailSignInForm = document.querySelector('#emailSignInForm');
+const authFeedback = document.querySelector('#authFeedback');
 const authEyebrow = document.querySelector('#authEyebrow');
 const authTitle = document.querySelector('#authTitle');
 const authDescription = document.querySelector('#authDescription');
@@ -102,9 +104,17 @@ async function finish(user) {
 }
 
 function showError(message) {
-  let notice = document.querySelector('#authError');
-  if (!notice) { notice = document.createElement('div'); notice.id = 'authError'; notice.className = 'auth-error'; document.querySelector('.auth-card').prepend(notice); }
-  notice.textContent = message;
+  authFeedback.textContent = message;
+  authFeedback.className = 'auth-feedback auth-feedback-error';
+  authFeedback.setAttribute('role', 'alert');
+  authFeedback.hidden = false;
+}
+
+function showAuthStatus(message, state) {
+  authFeedback.textContent = message;
+  authFeedback.className = `auth-feedback auth-feedback-${state}`;
+  authFeedback.setAttribute('role', 'status');
+  authFeedback.hidden = false;
 }
 
 function showFirebaseUnavailable() {
@@ -148,15 +158,29 @@ function updateMode() {
 }
 modeToggle.addEventListener('click', updateMode);
 
-document.querySelector('#sendEmailLink').addEventListener('click', async () => {
+emailSignInForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
   if (!auth) { showFirebaseUnavailable(); return; }
   if (auth.currentUser) { await finish(auth.currentUser); return; }
-  if (!emailInput.value || !emailInput.checkValidity()) { showError('Enter a valid email address.'); return; }
+  const email = emailInput.value.trim();
+  if (!email || !emailInput.checkValidity()) { showError('Enter a valid email address.'); return; }
   let phone;
   try { phone = phoneDetails(); }
   catch (error) { showError(error.message); return; }
   if (phone) rememberPhone(phone);
+  const submitButton = document.querySelector('#sendEmailLink');
+  submitButton.disabled = true;
+  showAuthStatus('Sending your secure sign-in link…', 'pending');
   const settings = { url: `${window.location.origin}/login.html`, handleCodeInApp: true };
-  try { await auth.sendSignInLinkToEmail(emailInput.value, settings); localStorage.setItem('traceEmailForSignIn', emailInput.value); showError(registerMode ? 'Registration link sent. Open it from this device to continue.' : 'Login link sent. Open it from this device to continue.'); }
-  catch (error) { showError(error.message || 'Could not send the sign-in link.'); }
+  try {
+    await auth.sendSignInLinkToEmail(email, settings);
+    localStorage.setItem('traceEmailForSignIn', email);
+    const action = registerMode ? 'Registration' : 'Login';
+    showAuthStatus(`${action} link sent to ${email}. Open it in this browser to verify your email and continue to the dashboard.`, 'success');
+  } catch (error) {
+    console.error('Email sign-in link could not be sent.', error);
+    showError(error.message || 'Could not send the sign-in link.');
+  } finally {
+    submitButton.disabled = false;
+  }
 });

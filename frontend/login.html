@@ -26,59 +26,62 @@
             <p id="authDescription">Register once, then map your exported data locally. TRACE never receives your platform passwords.</p>
             <button class="google-button" id="googleSignIn" type="button"><span class="google-g">G</span> <span id="googleLabel">Register with Google</span> <span class="button-arrow">↗</span></button>
             <div class="auth-divider"><span>OR VERIFY WITH EMAIL</span></div>
-            <label class="field-label" for="email">EMAIL ADDRESS</label>
-            <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-            <div class="phone-field">
-              <label class="field-label" for="countryCode">PHONE NUMBER</label>
-              <div class="phone-row">
-                <select class="country-select" id="countryCode" aria-label="Country code">
-                  <option value="+91" data-country="IN">🇮🇳 India (+91)</option>
-                  <option value="+1" data-country="US">🇺🇸 United States (+1)</option>
-                  <option value="+1" data-country="CA">🇨🇦 Canada (+1)</option>
-                  <option value="+44" data-country="GB">🇬🇧 United Kingdom (+44)</option>
-                  <option value="+353" data-country="IE">🇮🇪 Ireland (+353)</option>
-                  <option value="+61" data-country="AU">🇦🇺 Australia (+61)</option>
-                  <option value="+64" data-country="NZ">🇳🇿 New Zealand (+64)</option>
-                  <option value="+971" data-country="AE">🇦🇪 United Arab Emirates (+971)</option>
-                  <option value="+65" data-country="SG">🇸🇬 Singapore (+65)</option>
-                  <option value="+60" data-country="MY">🇲🇾 Malaysia (+60)</option>
-                  <option value="+62" data-country="ID">🇮🇩 Indonesia (+62)</option>
-                  <option value="+63" data-country="PH">🇵🇭 Philippines (+63)</option>
-                  <option value="+81" data-country="JP">🇯🇵 Japan (+81)</option>
-                  <option value="+82" data-country="KR">🇰🇷 South Korea (+82)</option>
-                  <option value="+86" data-country="CN">🇨🇳 China (+86)</option>
-                  <option value="+92" data-country="PK">🇵🇰 Pakistan (+92)</option>
-                  <option value="+880" data-country="BD">🇧🇩 Bangladesh (+880)</option>
-                  <option value="+94" data-country="LK">🇱🇰 Sri Lanka (+94)</option>
-                  <option value="+977" data-country="NP">🇳🇵 Nepal (+977)</option>
-                  <option value="+966" data-country="SA">🇸🇦 Saudi Arabia (+966)</option>
-                  <option value="+49" data-country="DE">🇩🇪 Germany (+49)</option>
-                  <option value="+33" data-country="FR">🇫🇷 France (+33)</option>
-                  <option value="+39" data-country="IT">🇮🇹 Italy (+39)</option>
-                  <option value="+34" data-country="ES">🇪🇸 Spain (+34)</option>
-                  <option value="+31" data-country="NL">🇳🇱 Netherlands (+31)</option>
-                  <option value="+41" data-country="CH">🇨🇭 Switzerland (+41)</option>
-                  <option value="+46" data-country="SE">🇸🇪 Sweden (+46)</option>
-                  <option value="+47" data-country="NO">🇳🇴 Norway (+47)</option>
-                  <option value="+45" data-country="DK">🇩🇰 Denmark (+45)</option>
-                  <option value="+27" data-country="ZA">🇿🇦 South Africa (+27)</option>
-                  <option value="+234" data-country="NG">🇳🇬 Nigeria (+234)</option>
-                  <option value="+254" data-country="KE">🇰🇪 Kenya (+254)</option>
-                  <option value="+20" data-country="EG">🇪🇬 Egypt (+20)</option>
-                  <option value="+90" data-country="TR">🇹🇷 Türkiye (+90)</option>
-                  <option value="+55" data-country="BR">🇧🇷 Brazil (+55)</option>
-                  <option value="+52" data-country="MX">🇲🇽 Mexico (+52)</option>
-                  <option value="+54" data-country="AR">🇦🇷 Argentina (+54)</option>
-                  <option value="+57" data-country="CO">🇨🇴 Colombia (+57)</option>
-                  <option value="+56" data-country="CL">🇨🇱 Chile (+56)</option>
-                  <option value="+66" data-country="TH">🇹🇭 Thailand (+66)</option>
-                  <option value="+84" data-country="VN">🇻🇳 Vietnam (+84)</option>
-                </select>
-                <input class="auth-input" id="phone" type="tel" placeholder="98765 43210" autocomplete="tel-national" />
+            <form id="emailSignInForm" class="auth-email-form" novalidate>
+              <label class="field-label" for="email">EMAIL ADDRESS</label>
+              <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+              <div class="phone-field">
+                <label class="field-label" for="countryCode">PHONE NUMBER</label>
+                <div class="phone-row">
+                  <select class="country-select" id="countryCode" aria-label="Country code">
+                    <option value="+91" data-country="IN">🇮🇳 India (+91)</option>
+                    <option value="+1" data-country="US">🇺🇸 United States (+1)</option>
+                    <option value="+1" data-country="CA">🇨🇦 Canada (+1)</option>
+                    <option value="+44" data-country="GB">🇬🇧 United Kingdom (+44)</option>
+                    <option value="+353" data-country="IE">🇮🇪 Ireland (+353)</option>
+                    <option value="+61" data-country="AU">🇦🇺 Australia (+61)</option>
+                    <option value="+64" data-country="NZ">🇳🇿 New Zealand (+64)</option>
+                    <option value="+971" data-country="AE">🇦🇪 United Arab Emirates (+971)</option>
+                    <option value="+65" data-country="SG">🇸🇬 Singapore (+65)</option>
+                    <option value="+60" data-country="MY">🇲🇾 Malaysia (+60)</option>
+                    <option value="+62" data-country="ID">🇮🇩 Indonesia (+62)</option>
+                    <option value="+63" data-country="PH">🇵🇭 Philippines (+63)</option>
+                    <option value="+81" data-country="JP">🇯🇵 Japan (+81)</option>
+                    <option value="+82" data-country="KR">🇰🇷 South Korea (+82)</option>
+                    <option value="+86" data-country="CN">🇨🇳 China (+86)</option>
+                    <option value="+92" data-country="PK">🇵🇰 Pakistan (+92)</option>
+                    <option value="+880" data-country="BD">🇧🇩 Bangladesh (+880)</option>
+                    <option value="+94" data-country="LK">🇱🇰 Sri Lanka (+94)</option>
+                    <option value="+977" data-country="NP">🇳🇵 Nepal (+977)</option>
+                    <option value="+966" data-country="SA">🇸🇦 Saudi Arabia (+966)</option>
+                    <option value="+49" data-country="DE">🇩🇪 Germany (+49)</option>
+                    <option value="+33" data-country="FR">🇫🇷 France (+33)</option>
+                    <option value="+39" data-country="IT">🇮🇹 Italy (+39)</option>
+                    <option value="+34" data-country="ES">🇪🇸 Spain (+34)</option>
+                    <option value="+31" data-country="NL">🇳🇱 Netherlands (+31)</option>
+                    <option value="+41" data-country="CH">🇨🇭 Switzerland (+41)</option>
+                    <option value="+46" data-country="SE">🇸🇪 Sweden (+46)</option>
+                    <option value="+47" data-country="NO">🇳🇴 Norway (+47)</option>
+                    <option value="+45" data-country="DK">🇩🇰 Denmark (+45)</option>
+                    <option value="+27" data-country="ZA">🇿🇦 South Africa (+27)</option>
+                    <option value="+234" data-country="NG">🇳🇬 Nigeria (+234)</option>
+                    <option value="+254" data-country="KE">🇰🇪 Kenya (+254)</option>
+                    <option value="+20" data-country="EG">🇪🇬 Egypt (+20)</option>
+                    <option value="+90" data-country="TR">🇹🇷 Türkiye (+90)</option>
+                    <option value="+55" data-country="BR">🇧🇷 Brazil (+55)</option>
+                    <option value="+52" data-country="MX">🇲🇽 Mexico (+52)</option>
+                    <option value="+54" data-country="AR">🇦🇷 Argentina (+54)</option>
+                    <option value="+57" data-country="CO">🇨🇴 Colombia (+57)</option>
+                    <option value="+56" data-country="CL">🇨🇱 Chile (+56)</option>
+                    <option value="+66" data-country="TH">🇹🇭 Thailand (+66)</option>
+                    <option value="+84" data-country="VN">🇻🇳 Vietnam (+84)</option>
+                  </select>
+                  <input class="auth-input" id="phone" type="tel" placeholder="98765 43210" autocomplete="tel-national" />
+                </div>
               </div>
-            </div>
-            <button class="auth-button" id="sendEmailLink" type="button">Register with email</button>
-            <p class="email-note">Firebase sends a secure one-time email link. Open it to verify your email and enter TRACE.</p>
+              <button class="auth-button" id="sendEmailLink" type="submit">Register with email</button>
+              <div id="authFeedback" class="auth-feedback" role="status" aria-live="polite" hidden></div>
+            </form>
+            <p class="email-note">Firebase sends a secure one-time email link. Open it in this browser to verify your email and continue to the dashboard.</p>
             <button class="mode-toggle" id="modeToggle" type="button">Already registered? Log in</button>
             <div class="auth-note"><span class="icon" data-icon="lock"></span><span>TRACE never asks for your Google, Spotify, Instagram, or other platform passwords.</span></div>
           </div>
