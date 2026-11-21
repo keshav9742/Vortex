@@ -1,5 +1,19 @@
 import { analyzeZip } from './analyzer.js';
 
+const dashboardRoot=document.documentElement;
+const themeToggle=document.querySelector('#themeToggle');
+const themeIcon=document.querySelector('#themeIcon');
+const themeLabel=document.querySelector('#themeLabel');
+function applyDashboardTheme(theme){
+  dashboardRoot.dataset.theme=theme;
+  if(themeIcon)themeIcon.textContent=theme==='dark'?'☼':'☾';
+  if(themeLabel)themeLabel.textContent=theme==='dark'?'Light theme':'Dark theme';
+  localStorage.setItem('trace-theme',theme);
+}
+const savedTheme=localStorage.getItem('trace-theme');
+applyDashboardTheme(savedTheme||((window.matchMedia?.('(prefers-color-scheme: light)').matches)?'light':'dark'));
+themeToggle?.addEventListener('click',()=>applyDashboardTheme(dashboardRoot.dataset.theme==='dark'?'light':'dark'));
+
 const icons = {
   grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
   map:'<svg viewBox="0 0 24 24"><path d="M9 18 3 21V6l6-3 6 3 6-3v15l-6 3-6-3Z"/><path d="M9 3v15M15 6v15"/></svg>',

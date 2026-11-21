@@ -1,12 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TRACE — Dashboard</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="dashboard-theme.css" />
   </head>
-  <body>
+  <body class="dashboard-body">
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand"><span class="brand-mark">⌁</span><span>trace</span><span class="brand-beta">BETA</span></div>
@@ -17,6 +18,7 @@
           <button type="button" id="planNav"><span class="icon" data-icon="shield"></span>Action plan<span class="online-dot"></span></button>
         </nav>
         <div class="side-bottom">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch theme"><span id="themeIcon">☼</span><span id="themeLabel">Light theme</span></button>
           <div class="privacy-lock"><span class="icon" data-icon="lock"></span><div><strong>Local analysis</strong><span>Archives stay on device</span></div><i class="online-dot"></i></div>
           <div class="version">TRACE v0.1.0 <span>•</span> OPEN SOURCE</div>
         </div>
@@ -72,6 +74,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="trace-background.js"></script>
     <script src="/api/firebase-config"></script>
-    <script type="module" src="dashboard.js?v=20261122-4"></script>
+    <script type="module" src="dashboard.js?v=20261122-5"></script>
   </body>
 </html>
