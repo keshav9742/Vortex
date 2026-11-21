@@ -6,7 +6,7 @@ import os
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, abort, redirect, render_template_string, request, session, url_for, Response
+from flask import Flask, abort, redirect, render_template_string, request, session, url_for, Response, send_from_directory
 
 from db import connect, create_user, get_user, init_db, verify_password, wipe_user, clear_platform
 from infer import infer_records
@@ -14,6 +14,7 @@ from parsers import detect_platform, parse_zip
 from scoring import build_findings, markdown_report
 
 BASE = Path(__file__).resolve().parent
+FRONTEND_BUILD = BASE.parent / "dist"
 KB = json.loads((BASE / "kb.json").read_text(encoding="utf-8"))
 app = Flask(__name__)
 app.secret_key = os.environ.get("TRACE_SECRET", "local-dev-secret-change-me")
@@ -49,7 +50,24 @@ def local_only():
         abort(400)
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", endpoint="frontend_home")
+def frontend_home():
+    """Serve the Vite-built website from the same local Flask process."""
+    if (FRONTEND_BUILD / "index.html").exists():
+        return send_from_directory(FRONTEND_BUILD, "index.html")
+    return redirect(url_for("login"))
+
+
+@app.route("/<path:filename>", endpoint="frontend_asset")
+def frontend_asset(filename):
+    """Serve built frontend assets while leaving API/report routes explicit."""
+    requested = FRONTEND_BUILD / filename
+    if FRONTEND_BUILD.exists() and requested.is_file():
+        return send_from_directory(FRONTEND_BUILD, filename)
+    abort(404)
+
+
+@app.route("/local-login", methods=["GET", "POST"])
 def login():
     error = None
     if request.method == "POST":
