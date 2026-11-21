@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TRACE — Private data map</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="login-page">
+      <section class="login-left">
+        <div class="brand"><span class="brand-mark">⌁</span><span>trace</span><span class="brand-beta">BETA</span></div>
+        <div class="login-copy">
+          <span class="eyebrow">YOUR PERSONAL DATA ATLAS</span>
+          <h1>See what your<br /><em>digital shadow</em> holds.</h1>
+          <p>Bring your exported archives together. TRACE maps what each platform knows, spots the sensitive overlaps, and helps you decide what to lock down first.</p>
+        </div>
+        <div class="login-foot">BUILT FOR CLARITY <span>•</span> DESIGNED FOR CONTROL</div>
+      </section>
+      <section class="login-right">
+        <div class="auth-card">
+          <div class="auth-step active" id="emailStep">
+            <span class="eyebrow">WELCOME BACK</span>
+            <h2>Start your private workspace</h2>
+            <p>Enter your email to receive a one-time verification code. Your archive files are analyzed locally after you sign in.</p>
+            <label class="field-label" for="email">EMAIL ADDRESS</label>
+            <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+            <button class="auth-button" id="sendOtp" type="button">Send verification code</button>
+            <div class="auth-note"><span class="icon" data-icon="lock"></span><span>Firebase will verify your email. TRACE never asks for your platform passwords.</span></div>
+          </div>
+          <div class="auth-step" id="otpStep">
+            <span class="eyebrow">CHECK YOUR INBOX</span>
+            <h2>Enter your code</h2>
+            <p>We sent a six-digit code to <strong id="emailPreview">your email</strong>.</p>
+            <label class="field-label">VERIFICATION CODE</label>
+            <div class="otp-row" id="otpRow">
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 1" />
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 2" />
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 3" />
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 4" />
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 5" />
+              <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
+            </div>
+            <button class="auth-button" id="verifyOtp" type="button">Verify and continue</button>
+            <button class="back-link" id="backToEmail" type="button">← Use a different email</button>
+            <div class="demo-hint">Demo mode: use <b>123456</b>. Connect Firebase in <code>login.js</code> for live OTP verification.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="login.js"></script>
+  </body>
+</html>
