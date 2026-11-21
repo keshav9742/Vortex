@@ -183,6 +183,11 @@ document.querySelector('#planLink').addEventListener('click',()=>{
 function initializeDashboardAuth(){
   let localSession=null;
   try{localSession=JSON.parse(localStorage.getItem('traceSession')||'null')}catch{}
+  const urlEmail=new URLSearchParams(window.location.search).get('email');
+  if(!localSession?.email && urlEmail){
+    localSession={email:urlEmail,createdAt:Date.now()};
+    localStorage.setItem('traceSession',JSON.stringify(localSession));
+  }
   if(localSession?.email){
     currentUser={uid:`local:${localSession.email}`,email:localSession.email};
     document.querySelector('#profileEmail').textContent=localSession.email;

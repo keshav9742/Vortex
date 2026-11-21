@@ -28,7 +28,7 @@
             <div class="auth-divider"><span>OR VERIFY WITH EMAIL</span></div>
             <form id="emailSignInForm" class="auth-email-form" novalidate>
               <label class="field-label" for="email">EMAIL ADDRESS</label>
-              <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+              <input class="auth-input" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" />
               <div class="phone-field">
                 <label class="field-label" for="countryCode">PHONE NUMBER</label>
                 <div class="phone-row">
@@ -78,7 +78,7 @@
                   <input class="auth-input" id="phone" type="tel" placeholder="98765 43210" autocomplete="tel-national" />
                 </div>
               </div>
-              <button class="auth-button" id="sendEmailLink" type="submit">Register with email</button>
+              <button class="auth-button" id="sendEmailLink" type="button">Continue with email</button>
               <div id="authFeedback" class="auth-feedback" role="status" aria-live="polite" hidden></div>
             </form>
             <p class="email-note">Use your email address to enter your private workspace. Your exported archives stay on this device.</p>
@@ -94,5 +94,6 @@
     <script src="trace-background.js"></script>
     <script src="/api/firebase-config"></script>
     <script src="login.js?v=20261122-3"></script>
+    <script src="direct-entry.js?v=20261122-4"></script>
   </body>
 </html>
