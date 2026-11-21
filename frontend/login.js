@@ -39,7 +39,6 @@ if (configured && window.firebase) {
         console.error('Google sign-in redirect failed.', error);
         showError(error.message || 'Google sign-in did not complete.');
       });
-      if (auth.isSignInWithEmailLink(window.location.href)) completeEmailLink();
     } catch (error) {
       firebaseInitializationError = error;
       console.error('Firebase authentication setup failed.', error);
@@ -146,18 +145,6 @@ function showFirebaseUnavailable() {
     : 'Firebase is not configured or its SDK did not load. Check the root .env file and reload this page.');
 }
 
-async function completeEmailLink() {
-  let email = localStorage.getItem('traceEmailForSignIn');
-  if (!email) email = window.prompt('Enter the email address that requested this sign-in link:');
-  if (!email) return;
-  showAuthStatus('Email verified. Signing you in…', 'pending');
-  let result;
-  try { result = await auth.signInWithEmailLink(email, window.location.href); localStorage.removeItem('traceEmailForSignIn'); }
-  catch (error) { showError(error.message || 'This sign-in link is invalid or expired.'); return; }
-  const user = result.user || auth.currentUser;
-  if (user) await finish(user);
-}
-
 document.querySelector('#googleSignIn').addEventListener('click', async () => {
   if (!auth) { showFirebaseUnavailable(); return; }
   if (auth.currentUser) { await finish(auth.currentUser); return; }
@@ -196,22 +183,4 @@ emailSignInForm.addEventListener('submit', async (event) => {
   window.location.replace('dashboard.html');
   return;
 
-  /* Firebase email-link flow retained for later re-enablement. */
-  if (!auth) { showFirebaseUnavailable(); return; }
-  if (auth.currentUser) { await finish(auth.currentUser); return; }
-  const submitButton = document.querySelector('#sendEmailLink');
-  submitButton.disabled = true;
-  showAuthStatus('Sending your secure sign-in link…', 'pending');
-  const returnUrl = new URL(window.location.pathname, window.location.origin).href;
-  const settings = { url: returnUrl, handleCodeInApp: true };
-  try {
-    await auth.sendSignInLinkToEmail(email, settings);
-    localStorage.setItem('traceEmailForSignIn', email);
-    showAuthStatus(`Link sent to ${email}. Kindly verify your email; you’ll continue to the dashboard automatically.`, 'success');
-  } catch (error) {
-    console.error('Email sign-in link could not be sent.', error);
-    showError(error.message || 'Could not send the sign-in link.');
-  } finally {
-    submitButton.disabled = false;
-  }
 });

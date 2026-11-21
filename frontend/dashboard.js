@@ -140,7 +140,6 @@ document.querySelector('#clearAnalyses').addEventListener('click',()=>{
 document.querySelector('#signOut').addEventListener('click',async()=>{
   try{
     localStorage.removeItem('traceSession');
-    localStorage.removeItem('traceDemoSession');
     if(window.firebase?.apps?.length) await firebase.auth().signOut();
     window.location.replace('login.html');
   }catch(error){
@@ -183,7 +182,7 @@ document.querySelector('#planLink').addEventListener('click',()=>{
 
 function initializeDashboardAuth(){
   let localSession=null;
-  try{localSession=JSON.parse(localStorage.getItem('traceSession')||localStorage.getItem('traceDemoSession')||'null')}catch{}
+  try{localSession=JSON.parse(localStorage.getItem('traceSession')||'null')}catch{}
   if(localSession?.email){
     currentUser={uid:`local:${localSession.email}`,email:localSession.email};
     document.querySelector('#profileEmail').textContent=localSession.email;
