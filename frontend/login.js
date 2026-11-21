@@ -12,6 +12,7 @@ const authTitle = document.querySelector('#authTitle');
 const authDescription = document.querySelector('#authDescription');
 const googleLabel = document.querySelector('#googleLabel');
 const modeToggle = document.querySelector('#modeToggle');
+const demoContinue = document.querySelector('#demoContinue');
 let registerMode = true;
 let auth = null;
 let db = null;
@@ -144,17 +145,35 @@ function showFirebaseUnavailable() {
   showError(reason
     ? `Firebase could not initialize: ${reason}`
     : 'Firebase is not configured or its SDK did not load. Check the root .env file and reload this page.');
+  offerDemoAccess(emailInput?.value?.trim());
 }
+
+function offerDemoAccess(email) {
+  if (!demoContinue) return;
+  demoContinue.dataset.email = email || 'demo@trace.local';
+  demoContinue.hidden = false;
+}
+
+demoContinue?.addEventListener('click', () => {
+  const email = demoContinue.dataset.email || emailInput.value.trim() || 'demo@trace.local';
+  localStorage.setItem('traceDemoSession', JSON.stringify({ email, createdAt: Date.now() }));
+  window.location.replace('dashboard.html?demo=1');
+});
 
 async function completeEmailLink() {
   let email = localStorage.getItem('traceEmailForSignIn');
   if (!email) email = window.prompt('Enter the email address that requested this sign-in link:');
   if (!email) return;
-  try { await auth.signInWithEmailLink(email, window.location.href); localStorage.removeItem('traceEmailForSignIn'); }
-  catch (error) { showError(error.message || 'This sign-in link is invalid or expired.'); }
+  showAuthStatus('Email verified. Signing you in…', 'pending');
+  let result;
+  try { result = await auth.signInWithEmailLink(email, window.location.href); localStorage.removeItem('traceEmailForSignIn'); }
+  catch (error) { showError(error.message || 'This sign-in link is invalid or expired.'); return; }
+  const user = result.user || auth.currentUser;
+  if (user) await finish(user);
 }
 
 document.querySelector('#googleSignIn').addEventListener('click', async () => {
+  localStorage.removeItem('traceDemoSession');
   if (!auth) { showFirebaseUnavailable(); return; }
   if (auth.currentUser) { await finish(auth.currentUser); return; }
   let phone;
@@ -182,6 +201,7 @@ modeToggle.addEventListener('click', updateMode);
 
 emailSignInForm.addEventListener('submit', async (event) => {
   event.preventDefault();
+  localStorage.removeItem('traceDemoSession');
   if (!auth) { showFirebaseUnavailable(); return; }
   if (auth.currentUser) { await finish(auth.currentUser); return; }
   const email = emailInput.value.trim();
@@ -193,15 +213,17 @@ emailSignInForm.addEventListener('submit', async (event) => {
   const submitButton = document.querySelector('#sendEmailLink');
   submitButton.disabled = true;
   showAuthStatus('Sending your secure sign-in link…', 'pending');
-  const settings = { url: `${window.location.origin}/login.html`, handleCodeInApp: true };
+  const returnUrl = new URL(window.location.pathname, window.location.origin).href;
+  const settings = { url: returnUrl, handleCodeInApp: true };
   try {
     await auth.sendSignInLinkToEmail(email, settings);
     localStorage.setItem('traceEmailForSignIn', email);
-    const action = registerMode ? 'Registration' : 'Login';
-    showAuthStatus(`${action} link sent to ${email}. Open it in this browser to verify your email and continue to the dashboard.`, 'success');
+    showAuthStatus(`Link sent to ${email}. Kindly verify your email; you’ll continue to the dashboard automatically.`, 'success');
+    offerDemoAccess(email);
   } catch (error) {
     console.error('Email sign-in link could not be sent.', error);
     showError(error.message || 'Could not send the sign-in link.');
+    offerDemoAccess(email);
   } finally {
     submitButton.disabled = false;
   }

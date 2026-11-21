@@ -139,7 +139,8 @@ document.querySelector('#clearAnalyses').addEventListener('click',()=>{
 
 document.querySelector('#signOut').addEventListener('click',async()=>{
   try{
-    await firebase.auth().signOut();
+    localStorage.removeItem('traceDemoSession');
+    if(window.firebase?.apps?.length) await firebase.auth().signOut();
     window.location.replace('login.html');
   }catch(error){
     showToast(error.message||'Could not sign out.',true);
@@ -180,6 +181,16 @@ document.querySelector('#planLink').addEventListener('click',()=>{
 });
 
 function initializeDashboardAuth(){
+  let demoSession=null;
+  try{demoSession=JSON.parse(localStorage.getItem('traceDemoSession')||'null')}catch{}
+  if(demoSession?.email){
+    currentUser={uid:`demo:${demoSession.email}`,email:demoSession.email};
+    document.querySelector('#profileEmail').textContent=`${demoSession.email} · demo mode`;
+    document.querySelector('#avatar').textContent=demoSession.email[0].toUpperCase();
+    try{renderAnalyses(readAnalyses(currentUser.uid))}
+    catch(error){showToast(error.message,true)}
+    return;
+  }
   if(!window.firebase||!window.TRACE_FIREBASE_CONFIG?.apiKey){
     showToast('Firebase could not load. Check deployment configuration and reload.',true);
     return;
