@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TRACE User</title>
+    <style>
+      :root { font-family: Arial, sans-serif; color: #172033; background: #f4f6fa; }
+      body { margin: 0; }
+      header { background: #172033; color: white; padding: 20px 32px; }
+      nav { display: flex; gap: 18px; margin-top: 12px; }
+      nav a { color: #b9c7e6; text-decoration: none; }
+      nav a:hover { color: white; }
+      main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+      .panel { background: white; border: 1px solid #dfe4ee; border-radius: 10px; padding: 24px; margin-top: 24px; }
+      .upload { border: 2px dashed #aebbd3; border-radius: 8px; padding: 42px 20px; text-align: center; margin-top: 18px; }
+      button { background: #3559d6; color: white; border: 0; border-radius: 6px; padding: 11px 16px; cursor: pointer; }
+      button:hover { background: #2848b8; }
+      .notice { color: #4d5b73; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TRACE</h1>
+      <p>Your local-first personal data map.</p>
+      <nav>
+        <a href="user page.html">User page</a>
+        <a href="admin page.html">Admin page</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Understand your digital footprint</h2>
+        <p class="notice">Upload your exported data archives to analyze them locally and discover what platforms know about you.</p>
+        <div class="upload">
+          <p>No files selected yet.</p>
+          <button type="button">Choose export files</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Your privacy report</h2>
+        <p class="notice">Your data map and prioritized recommendations will appear here after an export is analyzed.</p>
+      </section>
+    </main>
+  </body>
+</html>
