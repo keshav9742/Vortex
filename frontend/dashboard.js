@@ -195,6 +195,11 @@ function initializeDashboardAuth(){
       const email=user.email||'Verified user';
       document.querySelector('#profileEmail').textContent=email;
       document.querySelector('#avatar').textContent=email[0].toUpperCase();
+      const params=new URLSearchParams(window.location.search);
+      if(params.get('profileSync')==='failed'){
+        showToast('You are signed in, but your profile could not sync to Firebase. The dashboard is still available.',true);
+        window.history.replaceState(null,'',window.location.pathname);
+      }
       try{renderAnalyses(readAnalyses(user.uid))}
       catch(error){showToast(error.message,true)}
     },error=>{

@@ -21,18 +21,29 @@ let firebaseInitializationError = null;
 const configured = window.TRACE_FIREBASE_CONFIG?.apiKey && !window.TRACE_FIREBASE_CONFIG.apiKey.includes('PASTE_');
 if (configured && window.firebase) {
   try {
-    firebase.initializeApp(window.TRACE_FIREBASE_CONFIG);
+    if (!firebase.apps.length) firebase.initializeApp(window.TRACE_FIREBASE_CONFIG);
     auth = firebase.auth();
-    db = firebase.firestore();
-    auth.onAuthStateChanged((user) => { if (user) finish(user); });
-    auth.getRedirectResult().catch((error) => {
-      console.error('Google sign-in redirect failed.', error);
-      showError(error.message || 'Google sign-in did not complete.');
-    });
-    if (auth.isSignInWithEmailLink(window.location.href)) completeEmailLink();
   } catch (error) {
     firebaseInitializationError = error;
-    console.error('Firebase initialization failed.', error);
+    console.error('Firebase authentication initialization failed.', error);
+  }
+  if (auth) {
+    try {
+      db = firebase.firestore();
+    } catch (error) {
+      console.error('Firebase Firestore initialization failed.', error);
+    }
+    try {
+      auth.onAuthStateChanged((user) => { if (user) finish(user); });
+      auth.getRedirectResult().catch((error) => {
+        console.error('Google sign-in redirect failed.', error);
+        showError(error.message || 'Google sign-in did not complete.');
+      });
+      if (auth.isSignInWithEmailLink(window.location.href)) completeEmailLink();
+    } catch (error) {
+      firebaseInitializationError = error;
+      console.error('Firebase authentication setup failed.', error);
+    }
   }
 }
 
@@ -64,10 +75,6 @@ async function finish(user) {
       showError('Verify your email before entering TRACE.');
       return;
     }
-    if (!db) {
-      showError('Firebase Firestore is unavailable. Check your Firebase configuration and reload this page.');
-      return;
-    }
 
     let phone = phoneDetails();
     if (!phone) {
@@ -80,24 +87,39 @@ async function finish(user) {
       }
     }
 
-    const profile = {
-      email: user.email || null,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    if (phone) {
-      profile.phoneE164 = phone.phoneE164;
-      profile.phoneCountry = phone.phoneCountry;
-      profile.phoneVerified = false;
+    let profileSyncFailed = false;
+    if (db) {
+      const profile = {
+        email: user.email || null,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (phone) {
+        profile.phoneE164 = phone.phoneE164;
+        profile.phoneCountry = phone.phoneCountry;
+        profile.phoneVerified = false;
+      }
+      try {
+        await db.collection('users').doc(user.uid).set(profile, { merge: true });
+      } catch (error) {
+        profileSyncFailed = true;
+        console.error('Firebase profile setup failed.', error);
+      }
+    } else {
+      profileSyncFailed = true;
+      console.error('Firebase profile setup skipped because Firestore is unavailable.');
     }
-    await db.collection('users').doc(user.uid).set(profile, { merge: true });
 
     localStorage.setItem('traceUserEmail', user.email || user.phoneNumber || 'Verified user');
-    localStorage.removeItem('tracePendingPhone');
-    localStorage.removeItem('tracePendingCountry');
-    window.location.href = 'dashboard.html';
+    if (!profileSyncFailed) {
+      localStorage.removeItem('tracePendingPhone');
+      localStorage.removeItem('tracePendingCountry');
+    }
+    const dashboardUrl = new URL('dashboard.html', window.location.href);
+    if (profileSyncFailed) dashboardUrl.searchParams.set('profileSync', 'failed');
+    window.location.replace(dashboardUrl.href);
   } catch (error) {
-    console.error('Firebase profile setup failed.', error);
-    showError('Could not save your profile to Firebase. Check that Firestore is enabled and its rules allow this signed-in user to write their own profile.');
+    console.error('Could not complete the authenticated redirect.', error);
+    showError(error.message || 'Could not continue to the dashboard.');
   } finally {
     finishing = false;
   }
