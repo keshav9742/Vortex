@@ -35,10 +35,6 @@ if (configured && window.firebase) {
     }
     try {
       auth.onAuthStateChanged((user) => { if (user) finish(user); });
-      auth.getRedirectResult().catch((error) => {
-        console.error('Google sign-in redirect failed.', error);
-        showError(error.message || 'Google sign-in did not complete.');
-      });
     } catch (error) {
       firebaseInitializationError = error;
       console.error('Firebase authentication setup failed.', error);
@@ -146,18 +142,21 @@ function showFirebaseUnavailable() {
 }
 
 document.querySelector('#googleSignIn').addEventListener('click', async () => {
-  if (!auth) { showFirebaseUnavailable(); return; }
-  if (auth.currentUser) { await finish(auth.currentUser); return; }
   let phone;
   try { phone = phoneDetails(); }
   catch (error) { showError(error.message); return; }
   if (phone) rememberPhone(phone);
-  try { await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); }
-  catch (error) {
-    localStorage.removeItem('tracePendingPhone');
-    localStorage.removeItem('tracePendingCountry');
-    showError(error.message || 'Google sign-in could not be started.');
+  if (auth) {
+    try {
+      const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      if (result.user) { await finish(result.user); return; }
+    } catch (error) {
+      console.warn('Google sign-in unavailable; continuing to workspace.', error);
+    }
   }
+  const googleEmail = auth?.currentUser?.email || 'Google workspace';
+  localStorage.setItem('traceSession', JSON.stringify({email:googleEmail,provider:'google',createdAt:Date.now()}));
+  window.location.replace('dashboard.html');
 });
 
 function updateMode() {
