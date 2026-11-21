@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TRACE — Private data map</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="auth.css" />
   </head>
   <body>
     <main class="login-page">
@@ -22,16 +23,28 @@
           <div class="auth-step active" id="emailStep">
             <span class="eyebrow">WELCOME BACK</span>
             <h2>Start your private workspace</h2>
-            <p>Enter your email to receive a one-time verification code. Your archive files are analyzed locally after you sign in.</p>
-            <label class="field-label" for="email">EMAIL ADDRESS</label>
-            <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-            <button class="auth-button" id="sendOtp" type="button">Send verification code</button>
-            <div class="auth-note"><span class="icon" data-icon="lock"></span><span>Firebase will verify your email. TRACE never asks for your platform passwords.</span></div>
+            <p>Choose one secure way to enter. Your archive files are analyzed locally after you sign in.</p>
+            <button class="google-button" id="googleSignIn" type="button"><span class="google-g">G</span> Continue with Google <span class="button-arrow">↗</span></button>
+            <div class="auth-divider"><span>OR USE A CODE</span></div>
+            <div class="auth-tabs"><button class="auth-tab active" id="phoneTab" type="button">Phone SMS</button><button class="auth-tab" id="emailTab" type="button">Email link</button></div>
+            <div id="phonePanel">
+              <label class="field-label" for="phone">PHONE NUMBER</label>
+              <input class="auth-input" id="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel" />
+              <div id="recaptcha-container"></div>
+              <button class="auth-button" id="sendPhoneOtp" type="button">Send SMS code</button>
+            </div>
+            <div id="emailPanel" hidden>
+              <label class="field-label" for="email">EMAIL ADDRESS</label>
+              <input class="auth-input" id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+              <button class="auth-button" id="sendEmailLink" type="button">Send sign-in link</button>
+              <p class="email-note">Firebase’s native email flow uses a secure one-time link instead of a numeric email OTP.</p>
+            </div>
+            <div class="auth-note"><span class="icon" data-icon="lock"></span><span>TRACE never asks for your Google, Spotify, Instagram, or other platform passwords.</span></div>
           </div>
           <div class="auth-step" id="otpStep">
-            <span class="eyebrow">CHECK YOUR INBOX</span>
-            <h2>Enter your code</h2>
-            <p>We sent a six-digit code to <strong id="emailPreview">your email</strong>.</p>
+            <span class="eyebrow">CHECK YOUR PHONE</span>
+            <h2>Enter your SMS code</h2>
+            <p>We sent a six-digit code to <strong id="phonePreview">your phone</strong>.</p>
             <label class="field-label">VERIFICATION CODE</label>
             <div class="otp-row" id="otpRow">
               <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 1" />
@@ -42,12 +55,12 @@
               <input class="otp-input" maxlength="1" inputmode="numeric" aria-label="Digit 6" />
             </div>
             <button class="auth-button" id="verifyOtp" type="button">Verify and continue</button>
-            <button class="back-link" id="backToEmail" type="button">← Use a different email</button>
-            <div class="demo-hint">Demo mode: use <b>123456</b>. Connect Firebase in <code>login.js</code> for live OTP verification.</div>
+            <button class="back-link" id="backToEmail" type="button">← Use a different sign-in method</button>
+            <div class="demo-hint">Firebase not configured yet? Demo mode accepts <b>123456</b>. Add your project config in <code>firebase-config.js</code> for live auth.</div>
           </div>
         </div>
       </section>
     </main>
-    <script src="login.js"></script>
+    <script type="module" src="login.js"></script>
   </body>
 </html>

@@ -1,0 +1,28 @@
+{
+  "version": "2026-11-21",
+  "note": "Hand-written guidance. Re-verify menu paths before a public demo.",
+  "platforms": {
+    "google": {
+      "label": "Google",
+      "shares_score": 2,
+      "export_guide": ["Open takeout.google.com and sign in.", "Deselect all, then select My Activity and Location History.", "Choose JSON and create the export.", "Download the ZIP to this computer and drop it here."],
+      "data_types": {
+        "location": {"label": "Location history", "sensitivity": 5, "inferability": 5, "sharing": 2, "effort_min": 2, "why": "Reveals where you live, work, travel, and when you are away.", "steps": ["Open myactivity.google.com.", "Open Web & App Activity and Location History.", "Turn on auto-delete and delete older history."]},
+        "activity": {"label": "Search and activity history", "sensitivity": 4, "inferability": 4, "sharing": 2, "effort_min": 3, "why": "Search terms can reveal health, money, relationships, plans, and private interests.", "steps": ["Open myactivity.google.com.", "Filter sensitive activity and delete matching items.", "Turn on auto-delete for future activity."]}
+      },
+      "sensitive_steps": ["Open myactivity.google.com.", "Review and delete the sensitive searches shown by TRACE.", "Turn on auto-delete for future activity."]
+    },
+    "spotify": {
+      "label": "Spotify",
+      "shares_score": 3,
+      "export_guide": ["Open spotify.com/account/privacy.", "Request Extended streaming history.", "Download the ZIP when Spotify emails you.", "Drop it here for local analysis."],
+      "data_types": {
+        "activity": {"label": "Listening history", "sensitivity": 2, "inferability": 4, "sharing": 3, "effort_min": 5, "why": "Listening history can reveal routines, mood, language, culture, and sensitive interests.", "steps": ["Open spotify.com/account/privacy.", "Turn off tailored ads under Privacy Settings.", "Review connected apps and remove ones you do not use."]}
+      },
+      "sensitive_steps": ["Review sensitive artists, podcasts, or searches in the export.", "Turn off tailored ads in Spotify Privacy Settings."]
+    },
+    "instagram": {"label": "Instagram", "shares_score": 3, "data_types": {}, "sensitive_steps": ["Open Accounts Center and review Download your information.", "Turn off contact syncing and review ad preferences."]},
+    "amazon": {"label": "Amazon", "shares_score": 2, "data_types": {}, "sensitive_steps": ["Review Your Ads Privacy Choices.", "Review browsing history and personalized recommendations."]},
+    "meta": {"label": "Facebook / Meta", "shares_score": 3, "data_types": {}, "sensitive_steps": ["Open Accounts Center and review Ad preferences.", "Turn off contact uploading and review connected apps."]}
+  }
+}
