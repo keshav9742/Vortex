@@ -139,6 +139,7 @@ document.querySelector('#clearAnalyses').addEventListener('click',()=>{
 
 document.querySelector('#signOut').addEventListener('click',async()=>{
   try{
+    localStorage.removeItem('traceSession');
     localStorage.removeItem('traceDemoSession');
     if(window.firebase?.apps?.length) await firebase.auth().signOut();
     window.location.replace('login.html');
@@ -181,12 +182,12 @@ document.querySelector('#planLink').addEventListener('click',()=>{
 });
 
 function initializeDashboardAuth(){
-  let demoSession=null;
-  try{demoSession=JSON.parse(localStorage.getItem('traceDemoSession')||'null')}catch{}
-  if(demoSession?.email){
-    currentUser={uid:`demo:${demoSession.email}`,email:demoSession.email};
-    document.querySelector('#profileEmail').textContent=`${demoSession.email} · demo mode`;
-    document.querySelector('#avatar').textContent=demoSession.email[0].toUpperCase();
+  let localSession=null;
+  try{localSession=JSON.parse(localStorage.getItem('traceSession')||localStorage.getItem('traceDemoSession')||'null')}catch{}
+  if(localSession?.email){
+    currentUser={uid:`local:${localSession.email}`,email:localSession.email};
+    document.querySelector('#profileEmail').textContent=localSession.email;
+    document.querySelector('#avatar').textContent=localSession.email[0].toUpperCase();
     try{renderAnalyses(readAnalyses(currentUser.uid))}
     catch(error){showToast(error.message,true)}
     return;

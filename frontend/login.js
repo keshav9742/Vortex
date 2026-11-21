@@ -12,7 +12,6 @@ const authTitle = document.querySelector('#authTitle');
 const authDescription = document.querySelector('#authDescription');
 const googleLabel = document.querySelector('#googleLabel');
 const modeToggle = document.querySelector('#modeToggle');
-const demoContinue = document.querySelector('#demoContinue');
 let registerMode = true;
 let auth = null;
 let db = null;
@@ -145,20 +144,7 @@ function showFirebaseUnavailable() {
   showError(reason
     ? `Firebase could not initialize: ${reason}`
     : 'Firebase is not configured or its SDK did not load. Check the root .env file and reload this page.');
-  offerDemoAccess(emailInput?.value?.trim());
 }
-
-function offerDemoAccess(email) {
-  if (!demoContinue) return;
-  demoContinue.dataset.email = email || 'demo@trace.local';
-  demoContinue.hidden = false;
-}
-
-demoContinue?.addEventListener('click', () => {
-  const email = demoContinue.dataset.email || emailInput.value.trim() || 'demo@trace.local';
-  localStorage.setItem('traceDemoSession', JSON.stringify({ email, createdAt: Date.now() }));
-  window.location.replace('dashboard.html?demo=1');
-});
 
 async function completeEmailLink() {
   let email = localStorage.getItem('traceEmailForSignIn');
@@ -173,7 +159,6 @@ async function completeEmailLink() {
 }
 
 document.querySelector('#googleSignIn').addEventListener('click', async () => {
-  localStorage.removeItem('traceDemoSession');
   if (!auth) { showFirebaseUnavailable(); return; }
   if (auth.currentUser) { await finish(auth.currentUser); return; }
   let phone;
@@ -201,15 +186,19 @@ modeToggle.addEventListener('click', updateMode);
 
 emailSignInForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  localStorage.removeItem('traceDemoSession');
-  if (!auth) { showFirebaseUnavailable(); return; }
-  if (auth.currentUser) { await finish(auth.currentUser); return; }
   const email = emailInput.value.trim();
   if (!email || !emailInput.checkValidity()) { showError('Enter a valid email address.'); return; }
   let phone;
   try { phone = phoneDetails(); }
   catch (error) { showError(error.message); return; }
   if (phone) rememberPhone(phone);
+  localStorage.setItem('traceSession', JSON.stringify({ email, phone: phone?.phoneE164 || '', createdAt: Date.now() }));
+  window.location.replace('dashboard.html');
+  return;
+
+  /* Firebase email-link flow retained for later re-enablement. */
+  if (!auth) { showFirebaseUnavailable(); return; }
+  if (auth.currentUser) { await finish(auth.currentUser); return; }
   const submitButton = document.querySelector('#sendEmailLink');
   submitButton.disabled = true;
   showAuthStatus('Sending your secure sign-in link…', 'pending');
@@ -219,11 +208,9 @@ emailSignInForm.addEventListener('submit', async (event) => {
     await auth.sendSignInLinkToEmail(email, settings);
     localStorage.setItem('traceEmailForSignIn', email);
     showAuthStatus(`Link sent to ${email}. Kindly verify your email; you’ll continue to the dashboard automatically.`, 'success');
-    offerDemoAccess(email);
   } catch (error) {
     console.error('Email sign-in link could not be sent.', error);
     showError(error.message || 'Could not send the sign-in link.');
-    offerDemoAccess(email);
   } finally {
     submitButton.disabled = false;
   }
