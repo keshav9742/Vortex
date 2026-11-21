@@ -8,17 +8,36 @@ from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template_string, request, session, url_for, Response, send_from_directory
 
-from db import connect, create_user, get_user, init_db, verify_password, wipe_user, clear_platform
-from infer import infer_records
-from parsers import detect_platform, parse_zip
-from scoring import build_findings, markdown_report
+try:
+    from .db import connect, create_user, get_user, init_db, verify_password, wipe_user, clear_platform
+    from .infer import infer_records
+    from .parsers import detect_platform, parse_zip
+    from .scoring import build_findings, markdown_report
+except ImportError:
+    from db import connect, create_user, get_user, init_db, verify_password, wipe_user, clear_platform
+    from infer import infer_records
+    from parsers import detect_platform, parse_zip
+    from scoring import build_findings, markdown_report
 
 BASE = Path(__file__).resolve().parent
-FRONTEND_BUILD = BASE.parent / "dist"
+FRONTEND_DIR = BASE.parent / "frontend"
 KB = json.loads((BASE / "kb.json").read_text(encoding="utf-8"))
 app = Flask(__name__)
 app.secret_key = os.environ.get("TRACE_SECRET", "local-dev-secret-change-me")
 app.config.update(MAX_CONTENT_LENGTH=105 * 1024 * 1024, SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True)
+
+
+def load_local_env() -> dict[str, str]:
+    values = {}
+    env_path = BASE.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            values[key.strip()] = value.strip().strip("\"'")
+    return values
 
 BASE_HTML = """<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TRACE</title><style>body{font:15px system-ui;background:#f5f7fb;color:#101827;max-width:960px;margin:0 auto;padding:30px}a,button{background:#285ce3;color:white;padding:9px 13px;border-radius:5px;text-decoration:none;border:0;cursor:pointer}input,select{padding:9px;border:1px solid #cbd4e3;border-radius:4px}table{width:100%;background:white;border-collapse:collapse;margin:18px 0}td,th{padding:10px;border:1px solid #dde3ed;text-align:left}.card{background:white;border:1px solid #dde3ed;border-radius:8px;padding:18px;margin:14px 0}.critical{color:#c02719}.high{color:#b45309}.medium{color:#6b4c00}.muted{color:#68758a}.steps li{margin:7px 0}.danger{background:#b42318}</style></head><body><b>TRACE · local-first data exposure mapper</b> | <a href='{{ url_for('choose') }}'>Choose source</a> <a href='{{ url_for('results') }}'>Results</a>{% if session.get('uid') %} <a href='{{ url_for('logout') }}'>Log out</a>{% endif %}<hr>{{ body|safe }}</body></html>"""
 
@@ -38,7 +57,7 @@ def login_required(fn):
 
 @app.after_request
 def security_headers(response):
-    response.headers["Content-Security-Policy"] = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; base-uri 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' https://www.gstatic.com https://apis.google.com https://cdn.jsdelivr.net; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; frame-src https://*.firebaseapp.com https://accounts.google.com; img-src 'self' data: https:; form-action 'self'; frame-ancestors 'none'"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Cache-Control"] = "no-store"
     return response
@@ -46,24 +65,46 @@ def security_headers(response):
 
 @app.before_request
 def local_only():
-    if request.host.split(":")[0] not in {"127.0.0.1", "localhost"}:
+    host = request.host.split(":")[0].lower()
+    if host not in {"127.0.0.1", "localhost"}:
         abort(400)
 
 
 @app.route("/", endpoint="frontend_home")
 def frontend_home():
-    """Serve the Vite-built website from the same local Flask process."""
-    if (FRONTEND_BUILD / "index.html").exists():
-        return send_from_directory(FRONTEND_BUILD, "index.html")
+    """Serve the complete plain-HTML frontend from the same Flask process."""
+    if (FRONTEND_DIR / "index.html").exists():
+        return send_from_directory(FRONTEND_DIR, "index.html")
     return redirect(url_for("login"))
+
+
+@app.route("/firebase-config.js")
+@app.route("/api/firebase-config")
+def firebase_config():
+    values = load_local_env()
+    config = {
+        "apiKey": values.get("VITE_FIREBASE_API_KEY", ""),
+        "authDomain": values.get("VITE_FIREBASE_AUTH_DOMAIN", ""),
+        "projectId": values.get("VITE_FIREBASE_PROJECT_ID", ""),
+        "storageBucket": values.get("VITE_FIREBASE_STORAGE_BUCKET", ""),
+        "messagingSenderId": values.get("VITE_FIREBASE_MESSAGING_SENDER_ID", ""),
+        "appId": values.get("VITE_FIREBASE_APP_ID", "")
+    }
+    return Response("window.TRACE_FIREBASE_CONFIG = " + json.dumps(config) + ";", mimetype="application/javascript")
+
+
+@app.route("/kb.json")
+@app.route("/api/kb")
+def knowledge_base():
+    return send_from_directory(BASE, "kb.json", mimetype="application/json")
 
 
 @app.route("/<path:filename>", endpoint="frontend_asset")
 def frontend_asset(filename):
-    """Serve built frontend assets while leaving API/report routes explicit."""
-    requested = FRONTEND_BUILD / filename
-    if FRONTEND_BUILD.exists() and requested.is_file():
-        return send_from_directory(FRONTEND_BUILD, filename)
+    """Serve frontend assets while leaving backend routes explicit."""
+    requested = FRONTEND_DIR / filename
+    if FRONTEND_DIR.exists() and requested.is_file():
+        return send_from_directory(FRONTEND_DIR, filename)
     abort(404)
 
 
@@ -160,7 +201,3 @@ def report():
 def wipe():
     wipe_user(session["uid"]); return redirect(url_for("choose"))
 
-
-if __name__ == "__main__":
-    init_db()
-    app.run(host="127.0.0.1", port=8765, debug=False)

@@ -1,52 +1,104 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
 const iconMarkup = { lock: '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>' };
 document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = iconMarkup[el.dataset.icon] || ''; });
 
 const emailStep = document.querySelector('#emailStep');
-const otpStep = document.querySelector('#otpStep');
 const emailInput = document.querySelector('#email');
 const phoneInput = document.querySelector('#phone');
-const profilePhone = document.querySelector('#profilePhone');
-const phoneConsent = document.querySelector('#phoneConsent');
-const phonePreview = document.querySelector('#phonePreview');
-const otpInputs = [...document.querySelectorAll('.otp-input')];
-const phonePanel = document.querySelector('#phonePanel');
-const emailPanel = document.querySelector('#emailPanel');
-let confirmationResult = null;
+const countryCode = document.querySelector('#countryCode');
+const authEyebrow = document.querySelector('#authEyebrow');
+const authTitle = document.querySelector('#authTitle');
+const authDescription = document.querySelector('#authDescription');
+const googleLabel = document.querySelector('#googleLabel');
+const modeToggle = document.querySelector('#modeToggle');
+let registerMode = true;
 let auth = null;
 let db = null;
+let finishing = false;
+let firebaseInitializationError = null;
 
-const configured = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('PASTE_');
-if (configured) {
+const configured = window.TRACE_FIREBASE_CONFIG?.apiKey && !window.TRACE_FIREBASE_CONFIG.apiKey.includes('PASTE_');
+if (configured && window.firebase) {
   try {
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    onAuthStateChanged(auth, (user) => { if (user) finish(user); });
-    if (isSignInWithEmailLink(auth, window.location.href)) completeEmailLink();
-  } catch (error) { console.warn('Firebase initialization failed; demo mode enabled.', error); }
+    firebase.initializeApp(window.TRACE_FIREBASE_CONFIG);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    auth.onAuthStateChanged((user) => { if (user) finish(user); });
+    auth.getRedirectResult().catch((error) => {
+      console.error('Google sign-in redirect failed.', error);
+      showError(error.message || 'Google sign-in did not complete.');
+    });
+    if (auth.isSignInWithEmailLink(window.location.href)) completeEmailLink();
+  } catch (error) {
+    firebaseInitializationError = error;
+    console.error('Firebase initialization failed.', error);
+  }
+}
+
+function phoneDetails() {
+  const entered = (phoneInput?.value || '').trim();
+  if (!entered) return null;
+  const nationalNumber = entered.replace(/\D/g, '');
+  const dialCode = countryCode.value.replace(/\D/g, '');
+  const fullNumber = `${dialCode}${nationalNumber}`;
+  if (nationalNumber.length < 4 || fullNumber.length > 15) {
+    throw new Error('Enter a valid phone number for the selected country.');
+  }
+  return {
+    phoneE164: `+${fullNumber}`,
+    phoneCountry: countryCode.options[countryCode.selectedIndex].dataset.country
+  };
+}
+
+function rememberPhone(phone) {
+  localStorage.setItem('tracePendingPhone', phone.phoneE164);
+  localStorage.setItem('tracePendingCountry', phone.phoneCountry);
 }
 
 async function finish(user) {
-  const savedPhone = (profilePhone?.value || phoneInput?.value || '').trim();
-  if (db && phoneConsent?.checked && savedPhone) {
-    try { await setDoc(doc(db, 'users', user.uid), { email: user.email || null, phoneE164: savedPhone, phoneVerified: false, phoneRecoveryConsent: true, updatedAt: serverTimestamp() }, { merge: true }); }
-    catch (error) { console.warn('Profile metadata was not saved.', error); }
+  if (finishing) return;
+  finishing = true;
+  try {
+    if (!user.emailVerified) {
+      showError('Verify your email before entering TRACE.');
+      return;
+    }
+    if (!db) {
+      showError('Firebase Firestore is unavailable. Check your Firebase configuration and reload this page.');
+      return;
+    }
+
+    let phone = phoneDetails();
+    if (!phone) {
+      const pendingPhone = localStorage.getItem('tracePendingPhone');
+      if (pendingPhone) {
+        phone = {
+          phoneE164: pendingPhone,
+          phoneCountry: localStorage.getItem('tracePendingCountry') || ''
+        };
+      }
+    }
+
+    const profile = {
+      email: user.email || null,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (phone) {
+      profile.phoneE164 = phone.phoneE164;
+      profile.phoneCountry = phone.phoneCountry;
+      profile.phoneVerified = false;
+    }
+    await db.collection('users').doc(user.uid).set(profile, { merge: true });
+
+    localStorage.setItem('traceUserEmail', user.email || user.phoneNumber || 'Verified user');
+    localStorage.removeItem('tracePendingPhone');
+    localStorage.removeItem('tracePendingCountry');
+    window.location.href = 'dashboard.html';
+  } catch (error) {
+    console.error('Firebase profile setup failed.', error);
+    showError('Could not save your profile to Firebase. Check that Firestore is enabled and its rules allow this signed-in user to write their own profile.');
+  } finally {
+    finishing = false;
   }
-  localStorage.setItem('traceUserEmail', user.email || user.phoneNumber || 'Verified user');
-  if (savedPhone && phoneConsent?.checked) localStorage.setItem('traceUnverifiedPhone', savedPhone);
-  window.location.href = 'dashboard.html';
 }
 
 function showError(message) {
@@ -55,51 +107,56 @@ function showError(message) {
   notice.textContent = message;
 }
 
+function showFirebaseUnavailable() {
+  const reason = firebaseInitializationError?.message;
+  showError(reason
+    ? `Firebase could not initialize: ${reason}`
+    : 'Firebase is not configured or its SDK did not load. Check the root .env file and reload this page.');
+}
+
 async function completeEmailLink() {
   let email = localStorage.getItem('traceEmailForSignIn');
   if (!email) email = window.prompt('Enter the email address that requested this sign-in link:');
   if (!email) return;
-  try { await signInWithEmailLink(auth, email, window.location.href); localStorage.removeItem('traceEmailForSignIn'); }
+  try { await auth.signInWithEmailLink(email, window.location.href); localStorage.removeItem('traceEmailForSignIn'); }
   catch (error) { showError(error.message || 'This sign-in link is invalid or expired.'); }
 }
 
 document.querySelector('#googleSignIn').addEventListener('click', async () => {
-  if (!auth) { showError('Add your Firebase web config to firebase-config.js first.'); return; }
-  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-  catch (error) { showError(error.message || 'Google sign-in was cancelled.'); }
+  if (!auth) { showFirebaseUnavailable(); return; }
+  if (auth.currentUser) { await finish(auth.currentUser); return; }
+  let phone;
+  try { phone = phoneDetails(); }
+  catch (error) { showError(error.message); return; }
+  if (phone) rememberPhone(phone);
+  try { await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()); }
+  catch (error) {
+    localStorage.removeItem('tracePendingPhone');
+    localStorage.removeItem('tracePendingCountry');
+    showError(error.message || 'Google sign-in could not be started.');
+  }
 });
 
-document.querySelector('#phoneTab').addEventListener('click', () => { document.querySelector('#phoneTab').classList.add('active'); document.querySelector('#emailTab').classList.remove('active'); phonePanel.hidden = false; emailPanel.hidden = true; });
-document.querySelector('#emailTab').addEventListener('click', () => { document.querySelector('#emailTab').classList.add('active'); document.querySelector('#phoneTab').classList.remove('active'); phonePanel.hidden = true; emailPanel.hidden = false; });
-
-document.querySelector('#sendPhoneOtp').addEventListener('click', async () => {
-  if (!phoneInput.value.trim()) { showError('Enter a phone number with country code.'); return; }
-  if (!auth) { phonePreview.textContent = phoneInput.value; emailStep.classList.remove('active'); otpStep.classList.add('active'); otpInputs[0].focus(); return; }
-  try {
-    if (!window.recaptchaVerifier) window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
-    confirmationResult = await signInWithPhoneNumber(auth, phoneInput.value.trim(), window.recaptchaVerifier);
-    phonePreview.textContent = phoneInput.value; emailStep.classList.remove('active'); otpStep.classList.add('active'); otpInputs[0].focus();
-  } catch (error) { showError(error.message || 'Could not send the SMS code.'); }
-});
+function updateMode() {
+  registerMode = !registerMode;
+  authEyebrow.textContent = registerMode ? 'CREATE YOUR ACCOUNT' : 'WELCOME BACK';
+  authTitle.textContent = registerMode ? 'Create your private workspace' : 'Log in to your workspace';
+  authDescription.textContent = registerMode ? 'Register once, then map your exported data locally. TRACE never receives your platform passwords.' : 'Use your verified email to return to your local data workspace.';
+  googleLabel.textContent = registerMode ? 'Register with Google' : 'Log in with Google';
+  document.querySelector('#sendEmailLink').textContent = auth?.currentUser ? 'Continue to workspace' : (registerMode ? 'Register with email' : 'Log in with email');
+  modeToggle.textContent = registerMode ? 'Already registered? Log in' : 'New here? Create an account';
+}
+modeToggle.addEventListener('click', updateMode);
 
 document.querySelector('#sendEmailLink').addEventListener('click', async () => {
+  if (!auth) { showFirebaseUnavailable(); return; }
+  if (auth.currentUser) { await finish(auth.currentUser); return; }
   if (!emailInput.value || !emailInput.checkValidity()) { showError('Enter a valid email address.'); return; }
-  if (!auth) { showError('Add your Firebase web config to firebase-config.js first.'); return; }
-  const actionCodeSettings = { url: `${window.location.origin}/login.html`, handleCodeInApp: true };
-  try { await sendSignInLinkToEmail(auth, emailInput.value, actionCodeSettings); localStorage.setItem('traceEmailForSignIn', emailInput.value); showError('Sign-in link sent. Open it from this device to continue.'); }
+  let phone;
+  try { phone = phoneDetails(); }
+  catch (error) { showError(error.message); return; }
+  if (phone) rememberPhone(phone);
+  const settings = { url: `${window.location.origin}/login.html`, handleCodeInApp: true };
+  try { await auth.sendSignInLinkToEmail(emailInput.value, settings); localStorage.setItem('traceEmailForSignIn', emailInput.value); showError(registerMode ? 'Registration link sent. Open it from this device to continue.' : 'Login link sent. Open it from this device to continue.'); }
   catch (error) { showError(error.message || 'Could not send the sign-in link.'); }
 });
-
-otpInputs.forEach((input, index) => input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 1); if (input.value && otpInputs[index + 1]) otpInputs[index + 1].focus(); }));
-otpInputs.forEach((input, index) => input.addEventListener('keydown', (event) => { if (event.key === 'Backspace' && !input.value && otpInputs[index - 1]) otpInputs[index - 1].focus(); }));
-
-document.querySelector('#verifyOtp').addEventListener('click', () => {
-  const code = otpInputs.map((input) => input.value).join('');
-  if (confirmationResult) { confirmationResult.confirm(code).catch((error) => showError(error.message || 'The SMS code is invalid.')); return; }
-  if (code !== '123456') { otpInputs.forEach((input) => { input.style.borderColor = '#ff806e'; }); return; }
-  localStorage.setItem('traceUserEmail', phoneInput.value || emailInput.value);
-  if (profilePhone.value && phoneConsent.checked) localStorage.setItem('traceUnverifiedPhone', profilePhone.value.trim());
-  window.location.href = 'dashboard.html';
-});
-
-document.querySelector('#backToEmail').addEventListener('click', () => { otpStep.classList.remove('active'); emailStep.classList.add('active'); phoneInput.focus(); });

@@ -1,6 +1,6 @@
-// Replace these placeholders with the Web app config from Firebase Console.
-// Never place a Firebase service-account JSON key in this browser file.
-const firebaseConfig = {
+// app.py serves this file dynamically from the root .env values.
+// This fallback keeps the page safe if opened without app.py.
+window.TRACE_FIREBASE_CONFIG = window.TRACE_FIREBASE_CONFIG || {
   apiKey: 'PASTE_FIREBASE_API_KEY',
   authDomain: 'PASTE_PROJECT_ID.firebaseapp.com',
   projectId: 'PASTE_PROJECT_ID',
@@ -8,5 +8,3 @@ const firebaseConfig = {
   messagingSenderId: 'PASTE_MESSAGING_SENDER_ID',
   appId: 'PASTE_FIREBASE_APP_ID'
 };
-
-export default firebaseConfig;

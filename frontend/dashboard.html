@@ -25,7 +25,7 @@
       <main class="main">
         <header class="topbar">
           <div class="breadcrumb">WORKSPACE <span>/</span> OVERVIEW</div>
-          <div class="profile-pill"><div class="avatar" id="avatar">U</div><div><strong id="profileEmail">Local profile</strong><span>Verified workspace</span></div></div>
+          <div class="profile-pill"><div class="avatar" id="avatar">U</div><div><strong id="profileEmail">Local profile</strong><span>Verified workspace</span></div><button class="sign-out" id="signOut" type="button">Sign out</button></div>
         </header>
 
         <div class="page">
@@ -35,10 +35,10 @@
           </section>
 
           <section class="stats-row" aria-label="Workspace summary">
-            <div class="stat"><span class="eyebrow">SOURCES MAPPED</span><strong>00</strong><small>Add an export to begin</small></div>
-            <div class="stat"><span class="eyebrow">DATA POINTS</span><strong>—</strong><small>Analyzed locally</small></div>
-            <div class="stat"><span class="eyebrow">EXPOSURE SCORE</span><strong class="coral">—<sup>/100</sup></strong><small>Calculated after upload</small></div>
-            <div class="stat"><span class="eyebrow">PRIVACY STATUS</span><strong class="green">Ready</strong><small>Nothing uploaded</small></div>
+            <div class="stat"><span class="eyebrow">SOURCES MAPPED</span><strong id="sourceCount">00</strong><small>Add an export to begin</small></div>
+            <div class="stat"><span class="eyebrow">DATA POINTS</span><strong id="dataPointCount">—</strong><small>Analyzed in this browser</small></div>
+            <div class="stat"><span class="eyebrow">HIGHEST PRIORITY</span><strong class="coral" id="exposureScore">—</strong><small>Top finding score</small></div>
+            <div class="stat"><span class="eyebrow">PRIVACY STATUS</span><strong class="green" id="privacyStatus">Ready</strong><small id="privacyNote">Archives stay on this device</small></div>
           </section>
 
           <div class="section-title"><div><span class="eyebrow">01 / CHOOSE A SOURCE</span><h2>Where does your data live?</h2></div><a href="#how-it-works">How this works →</a></div>
@@ -51,7 +51,12 @@
             <button class="platform-card" data-platform="meta" style="--brand:#6f8cff"><i class="platform-accent"></i><div class="platform-head"><span class="platform-logo">∞</span><div><h3>Facebook / Meta</h3><span>Ads · Contacts · Activity</span></div><span class="card-arrow">↗</span></div><p>Download your account center information, ad interests, contacts, and activity history.</p><div class="platform-bottom"><span>EST. 5–15 MIN</span><b>View guide →</b></div></button>
           </section>
 
-          <section class="drop-card"><div class="drop-icon"><span class="icon" data-icon="upload"></span></div><div><h3>Already have an export?</h3><p>Drop a Google, Spotify, or other supported ZIP file here. It is read on this device only.</p></div><button id="dropButton" type="button">Choose file</button><input id="archiveInput" type="file" accept=".zip,.json,.csv" hidden /></section>
+          <section class="drop-card"><div class="drop-icon"><span class="icon" data-icon="upload"></span></div><div><h3>Already have an export?</h3><p>Choose a Google or Spotify ZIP. It is opened and analyzed in this browser; the archive is never uploaded.</p></div><button id="dropButton" type="button">Choose file</button><input id="archiveInput" type="file" accept=".zip,application/zip" hidden /></section>
+
+          <section class="analysis-results" id="analysisResults" hidden aria-live="polite">
+            <div class="section-title"><div><span class="eyebrow">02 / LOCAL ANALYSIS</span><h2>Your exposure findings</h2></div><div class="analysis-actions"><button class="secondary-action" id="downloadReport" type="button">Download report</button><button class="secondary-action" id="clearAnalyses" type="button">Clear local results</button></div></div>
+            <div id="analysisCards"></div>
+          </section>
 
           <section class="recent-grid" id="how-it-works"><div class="mini-panel shield-note"><span class="icon" data-icon="shield"></span><div><span class="eyebrow">WHY TRACE?</span><h3>See the overlap, not just the permission.</h3><p>Permissions tell you what an app wants. Your exports show what it has already accumulated.</p></div></div><div class="mini-panel"><span class="eyebrow">NEXT STEP</span><h3>Your action plan will appear here.</h3><p>Once we analyze an archive, we rank the highest-impact fixes and link you to the exact settings page.</p><button class="mini-link" id="planLink" type="button">Learn about priorities →</button></div></section>
         </div>
@@ -62,6 +67,10 @@
       <section class="guide-modal"><header class="modal-head"><span class="platform-logo" id="guideLogo">G</span><div><h2 id="guideTitle">Google Takeout</h2><p id="guideSubtitle">Request your archive</p></div><button class="close-modal" id="closeModal" aria-label="Close">×</button></header><div class="guide-body"><div class="guide-intro"><strong>Nothing is sent to TRACE yet.</strong><span>LOCAL-FIRST FLOW</span></div><div id="guideSteps"></div><div class="file-drop"><span class="icon" data-icon="upload"></span><p>When your ZIP is ready, drop it here or choose it below.</p><button class="secondary-action" id="modalChoose" type="button">Choose archive</button></div><div class="guide-actions"><button class="primary-action" id="openExport" type="button">Open export page ↗</button><button class="secondary-action" id="modalDone" type="button">I’ll do this later</button></div></div></section>
     </div>
     <div class="toast" id="toast" hidden></div>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="/api/firebase-config"></script>
     <script type="module" src="dashboard.js"></script>
   </body>
 </html>
