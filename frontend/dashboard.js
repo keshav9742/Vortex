@@ -7,6 +7,16 @@ const icons = {
 };
 document.querySelectorAll('[data-icon]').forEach((el)=>{el.innerHTML=icons[el.dataset.icon]||''});
 
+const brandLogos={
+  google:'<img src="assets/logos/google.png" alt="Google logo">',
+  spotify:'<img src="assets/logos/spotify.png" alt="Spotify logo">',
+  instagram:'<img src="assets/logos/instagram.png" alt="Instagram logo">',
+  amazon:'<img src="assets/logos/amazon.png" alt="Amazon logo">',
+  youtube:'<img src="assets/logos/youtube.png" alt="YouTube logo">',
+  meta:'<img src="assets/logos/facebook.png" alt="Facebook logo">'
+};
+document.querySelectorAll('[data-platform] .platform-logo').forEach((el)=>{el.innerHTML=brandLogos[el.closest('[data-platform]').dataset.platform]||''});
+
 const guides={
   google:{title:'Google Takeout',subtitle:'Export activity, Maps history, and searches',logo:'G',color:'#5b8def',url:'https://takeout.google.com',steps:['Open <code>takeout.google.com</code> and sign in to the Google account you want to check.','Click <b>Deselect all</b>, then select <b>My Activity</b> and <b>Location History</b> (Timeline).','Choose <b>JSON</b> as the format, then select <b>Create export</b>.','When Google emails you, download the ZIP to this device and drop it into TRACE.']},
   spotify:{title:'Spotify',subtitle:'Request listening history and account data',logo:'●',color:'#1ed760',url:'https://www.spotify.com/account/privacy/',steps:['Open <code>spotify.com/account/privacy</code> and sign in.','Scroll to <b>Download your data</b> and request <b>Extended streaming history</b>.','Spotify will email a download link when your archive is ready.','Download the ZIP here, then drop it into TRACE for local analysis.']},
@@ -18,7 +28,7 @@ const guides={
 
 const modal=document.querySelector('#guideModal'); const guideLogo=document.querySelector('#guideLogo'); const guideTitle=document.querySelector('#guideTitle'); const guideSubtitle=document.querySelector('#guideSubtitle'); const guideSteps=document.querySelector('#guideSteps'); const openExport=document.querySelector('#openExport'); const archiveInput=document.querySelector('#archiveInput');
 let currentGuide=null;
-function showGuide(key){currentGuide=guides[key]; guideLogo.textContent=currentGuide.logo; guideLogo.style.setProperty('--brand',currentGuide.color); guideTitle.textContent=currentGuide.title; guideSubtitle.textContent=currentGuide.subtitle; guideSteps.innerHTML=currentGuide.steps.map((s,i)=>`<div class="step"><span class="step-num">0${i+1}</span><div><h4>${['Open the official export page','Choose what to include','Request your archive','Bring it back to TRACE'][i]}</h4><p>${s}</p></div></div>`).join(''); openExport.onclick=()=>window.open(currentGuide.url,'_blank','noopener,noreferrer'); modal.classList.add('open');}
+function showGuide(key){currentGuide=guides[key]; guideLogo.innerHTML=brandLogos[key]||currentGuide.logo; guideLogo.style.setProperty('--brand',currentGuide.color); guideTitle.textContent=currentGuide.title; guideSubtitle.textContent=currentGuide.subtitle; guideSteps.innerHTML=currentGuide.steps.map((s,i)=>`<div class="step"><span class="step-num">0${i+1}</span><div><h4>${['Open the official export page','Choose what to include','Request your archive','Bring it back to TRACE'][i]}</h4><p>${s}</p></div></div>`).join(''); openExport.onclick=()=>window.open(currentGuide.url,'_blank','noopener,noreferrer'); modal.classList.add('open');}
 document.querySelectorAll('[data-platform]').forEach((card)=>card.addEventListener('click',()=>showGuide(card.dataset.platform)));
 document.querySelector('#closeModal').addEventListener('click',()=>modal.classList.remove('open')); document.querySelector('#modalDone').addEventListener('click',()=>modal.classList.remove('open')); modal.addEventListener('click',(e)=>{if(e.target===modal)modal.classList.remove('open')});
 document.querySelector('#modalChoose').addEventListener('click',()=>archiveInput.click()); document.querySelector('#dropButton').addEventListener('click',()=>archiveInput.click()); document.querySelector('#addArchive').addEventListener('click',()=>archiveInput.click());
