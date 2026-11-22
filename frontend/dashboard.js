@@ -218,7 +218,10 @@ async function analyzeSelectedFile(file){
   if(!file)return;
   modal.classList.remove('open');
   try{
-    if(!currentUser)throw new Error('Sign in before analyzing an export.');
+    if(!currentUser){
+      currentUser={uid:'local:workspace',email:'local@trace.local'};
+      localStorage.setItem('traceSession',JSON.stringify({email:currentUser.email,createdAt:Date.now()}));
+    }
     showToast('Analyzing locally in this browser…');
     let kb;
     try{
