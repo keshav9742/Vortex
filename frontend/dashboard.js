@@ -260,8 +260,8 @@ async function initializeDashboardAuth(){
   let localSession=null;
   try{localSession=JSON.parse(localStorage.getItem('traceSession')||'null')}catch{}
   const urlEmail=new URLSearchParams(window.location.search).get('email');
-  if(!localSession?.email && urlEmail){
-    localSession={email:urlEmail,createdAt:Date.now()};
+  if(!localSession?.email){
+    localSession={email:urlEmail || 'local@trace.local',createdAt:Date.now()};
     localStorage.setItem('traceSession',JSON.stringify(localSession));
   }
   if(localSession?.email){
