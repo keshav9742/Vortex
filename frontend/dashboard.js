@@ -249,7 +249,7 @@ document.querySelector('#planLink').addEventListener('click',()=>{
   analysisResults.scrollIntoView({behavior:'smooth',block:'start'});
 });
 
-function initializeDashboardAuth(){
+async function initializeDashboardAuth(){
   let localSession=null;
   try{localSession=JSON.parse(localStorage.getItem('traceSession')||'null')}catch{}
   const urlEmail=new URLSearchParams(window.location.search).get('email');
