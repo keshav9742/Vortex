@@ -53,14 +53,25 @@
             <button class="platform-card" data-platform="meta" style="--brand:#6f8cff"><i class="platform-accent"></i><div class="platform-head"><span class="platform-logo">∞</span><div><h3>Facebook / Meta</h3><span>Ads · Contacts · Activity</span></div><span class="card-arrow">↗</span></div><p>Download your account center information, ad interests, contacts, and activity history.</p><div class="platform-bottom"><span>EST. 5–15 MIN</span><b>View guide →</b></div></button>
           </section>
 
-          <section class="drop-card"><div class="drop-icon"><span class="icon" data-icon="upload"></span></div><div><h3>Already have an export?</h3><p>Choose a Google or Spotify ZIP. It is opened and analyzed in this browser; the archive is never uploaded.</p></div><button id="dropButton" type="button">Choose file</button><input id="archiveInput" type="file" accept=".zip,application/zip" hidden /></section>
+          <section class="drop-card"><div class="drop-icon"><span class="icon" data-icon="upload"></span></div><div><h3>Already have an export?</h3><p>Choose a Google, Spotify, Instagram, Amazon, Meta, JSON, CSV, or HTML export. It is opened and analyzed in this browser; the archive is never uploaded.</p><div class="upload-proof"><strong id="uploadBytes">0 bytes uploaded</strong><span>Nothing from your file leaves this device.</span></div></div><button id="dropButton" type="button">Choose file</button><input id="archiveInput" type="file" accept=".zip,.json,.csv,.html,.htm,application/zip,application/json,text/csv,text/html" hidden /></section>
 
           <section class="analysis-results" id="analysisResults" hidden aria-live="polite">
-            <div class="section-title"><div><span class="eyebrow">02 / LOCAL ANALYSIS</span><h2>Your exposure findings</h2></div><div class="analysis-actions"><button class="secondary-action" id="downloadReport" type="button">Download report</button><button class="secondary-action" id="clearAnalyses" type="button">Clear local results</button></div></div>
+            <div class="section-title"><div><span class="eyebrow">02 / LOCAL ANALYSIS</span><h2>Your exposure findings</h2></div><div class="analysis-actions"><button class="secondary-action" id="downloadReport" type="button">Download report</button><button class="secondary-action" id="printReport" type="button">Print / save PDF</button><button class="secondary-action" id="clearAnalyses" type="button">Clear local results</button></div></div>
+            <p class="formula-note">Risk formula: <b>sensitivity × data volume × inference potential × sharing exposure ÷ effort to fix</b>. Every item is labelled as found in your data or likely inferred.</p>
             <div id="analysisCards"></div>
           </section>
 
-          <section class="recent-grid" id="how-it-works"><div class="mini-panel shield-note"><span class="icon" data-icon="shield"></span><div><span class="eyebrow">WHY TRACE?</span><h3>See the overlap, not just the permission.</h3><p>Permissions tell you what an app wants. Your exports show what it has already accumulated.</p></div></div><div class="mini-panel"><span class="eyebrow">NEXT STEP</span><h3>Your action plan will appear here.</h3><p>Once we analyze an archive, we rank the highest-impact fixes and link you to the exact settings page.</p><button class="mini-link" id="planLink" type="button">Learn about priorities →</button></div></section>
+          <section class="visual-insights" id="visualInsights" hidden aria-live="polite">
+            <div class="section-title"><div><span class="eyebrow">03 / DIGITAL SHADOW</span><h2>What connects across platforms</h2></div></div>
+            <div class="visual-grid">
+              <article class="visual-card"><h3>Personal data graph</h3><p class="visual-caption">Platforms connect to the categories they know about.</p><svg id="shadowGraph" viewBox="0 0 560 300" role="img" aria-label="Digital shadow relationship graph"></svg></article>
+              <article class="visual-card"><h3>Shared knowledge</h3><p class="visual-caption">The same category appearing across platforms creates an overlap.</p><div id="overlapList" class="overlap-list"></div></article>
+              <article class="visual-card"><h3>Frequent places</h3><p class="visual-caption">Coordinates stay local; TRACE only shows rounded clusters.</p><svg id="locationMap" viewBox="0 0 520 150" role="img" aria-label="Local rounded location clusters"></svg><div id="locationClusters" class="cluster-list"></div></article>
+              <article class="visual-card"><h3>Activity rhythm</h3><p class="visual-caption">A local hour-by-day heatmap of exported activity.</p><div id="rhythmGrid" class="rhythm-grid" aria-label="Activity rhythm heatmap"></div><div class="rhythm-hours"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div></article>
+            </div>
+          </section>
+
+          <section class="recent-grid" id="how-it-works"><div class="mini-panel shield-note"><span class="icon" data-icon="shield"></span><div><span class="eyebrow">WHY TRACE?</span><h3>See the overlap, not just the permission.</h3><p>Permissions tell you what an app wants. Your exports show what it has already accumulated.</p></div></div><div class="mini-panel"><span class="eyebrow">LOCAL CONTROLS</span><h3>Your data stays in this browser.</h3><p>Parsed records and reports are stored in IndexedDB only. Theme preference and your workspace email are the only small preferences kept in local storage.</p><button class="mini-link" id="clearAllLocal" type="button">Clear all local data →</button></div></section>
         </div>
       </main>
     </div>
