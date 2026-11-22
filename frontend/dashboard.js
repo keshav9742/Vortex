@@ -22,12 +22,12 @@ const icons = {
   lock:'<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'
 };
 const brandLogos = {
-  google:'<svg viewBox="0 0 24 24" aria-label="Google"><path fill="#4285F4" d="M21.6 12.23c0-.7-.06-1.37-.18-2H12v3.79h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.22c1.89-1.74 2.99-4.3 2.99-7.32Z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.61-2.45l-3.22-2.51c-.9.6-2.05.96-3.39.96-2.61 0-4.83-1.76-5.62-4.13H3.05v2.59A9.99 9.99 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.38 13.87A6.01 6.01 0 0 1 6.06 12c0-.65.11-1.28.32-1.87V7.54H3.05A10 10 0 0 0 2 12c0 1.61.39 3.13 1.05 4.46l3.33-2.59Z"/><path fill="#EA4335" d="M12 6c1.47 0 2.79.51 3.83 1.51l2.87-2.87C16.95 2.9 14.7 2 12 2a9.99 9.99 0 0 0-8.95 5.54l3.33 2.59C7.17 7.76 9.39 6 12 6Z"/></svg>',
-  spotify:'<svg viewBox="0 0 24 24" aria-label="Spotify"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7 9.2c3.4-1 6.8-.7 10 .6M7.6 12.2c2.8-.7 5.5-.4 8.1.6M8.4 15c2-.4 4-.2 5.8.5" fill="none" stroke="#07130b" stroke-width="1.5" stroke-linecap="round"/></svg>',
-  instagram:'<svg viewBox="0 0 24 24" aria-label="Instagram"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.7" r="1.2" fill="currentColor"/></svg>',
-  amazon:'<svg viewBox="0 0 24 24" aria-label="Amazon"><text x="4" y="15" font-size="14" font-weight="700" fill="currentColor">a</text><path d="M5 18c4 3 9 3 14 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-  youtube:'<svg viewBox="0 0 24 24" aria-label="YouTube"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor"/><path d="m10 9 5 3-5 3Z" fill="#fff"/></svg>',
-  meta:'<svg viewBox="0 0 24 24" aria-label="Meta"><path d="M3 15c2.5-7 5.5-7 9 0s6.5 7 9 0c-2.5-7-5.5-7-9 0S5.5 22 3 15Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+  google:'<img src="assets/logos/google.png" alt="Google logo">',
+  spotify:'<img src="assets/logos/spotify.png" alt="Spotify logo">',
+  instagram:'<img src="assets/logos/instagram.png" alt="Instagram logo">',
+  amazon:'<img src="assets/logos/amazon.png" alt="Amazon logo">',
+  youtube:'<img src="assets/logos/youtube.png" alt="YouTube logo">',
+  meta:'<img src="assets/logos/facebook.png" alt="Facebook logo">'
 };
 document.querySelectorAll('[data-icon]').forEach((el)=>{el.innerHTML=icons[el.dataset.icon]||''});
 document.querySelectorAll('[data-platform] .platform-logo').forEach((el)=>{el.innerHTML=brandLogos[el.closest('[data-platform]').dataset.platform]||''});
