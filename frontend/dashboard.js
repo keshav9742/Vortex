@@ -14,7 +14,7 @@ function applyDashboardTheme(choice){
 }
 const savedTheme=localStorage.getItem('trace-theme-choice')||localStorage.getItem('trace-theme')||'system';
 applyDashboardTheme(savedTheme);
-themeToggle?.addEventListener('click',()=>applyDashboardTheme(({dark:'light',light:'system',system:'dark'})[localStorage.getItem('trace-theme-choice')||savedTheme]||'system'));
+themeToggle?.addEventListener('click',()=>applyDashboardTheme(dashboardRoot.dataset.theme==='dark'?'light':'dark'));
 
 const icons = {
   grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
