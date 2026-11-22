@@ -220,9 +220,16 @@ async function analyzeSelectedFile(file){
   try{
     if(!currentUser)throw new Error('Sign in before analyzing an export.');
     showToast('Analyzing locally in this browser…');
-    const response=await fetch('/api/kb');
-    if(!response.ok)throw new Error(`Analysis guidance could not be loaded (HTTP ${response.status}).`);
-    const kb=await response.json();
+    let kb;
+    try{
+      const response=await fetch('/api/kb');
+      if(!response.ok)throw new Error(`HTTP ${response.status}`);
+      kb=await response.json();
+    }catch{
+      const localResponse=await fetch('./kb.json');
+      if(!localResponse.ok)throw new Error('Analysis guidance could not be loaded.');
+      kb=await localResponse.json();
+    }
     const analysis=await analyzeZip(file,kb,progress=>showToast(`${progress.stage} · ${progress.percent}%`));
     await saveAnalysis(currentUser.uid,analysis);
     const saved=await readAnalyses(currentUser.uid);
